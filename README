@@ -1,0 +1,85 @@
+# Projet SmartCities
+
+## Présentation
+Ce dépôt GitHub a été créé dans le cadre du **cours de MicroPython** et du **projet Smartcorridor (SmartCities)** à la **HEPL** — Haute École de la Province de Liège.  
+Chaque étudiant·e doit créer et structurer son propre dépôt personnel afin de présenter ses travaux pratiques réalisés avec le **Raspberry Pi Pico (ou Pico W)**.  
+Ce dépôt servira de support à **l’évaluation continue**.
+
+---
+
+## Objectif du projet
+Apprendre à programmer un **microcontrôleur** en **MicroPython** à travers différents modules :
+- Entrées / sorties numériques (GPIO)  
+- Lecture analogique (ADC) et génération de signal PWM  
+- Affichage LCD  
+- Contrôle de LED NeoPixel  
+- Lecture de capteurs (température, humidité, luminosité, PIR…)  
+- Connexion réseau (Wi-Fi) avec le Pico W  
+
+---
+
+## Matériel utilisé
+- **Microcontrôleur :** Raspberry Pi Pico / Pico W  
+- **Langage :** MicroPython  
+- **IDE :** Thonny ou Visual Studio Code (avec extension MicroPython)  
+- **Câbles :** micro-USB et fils Dupont  
+- **Modules :** LED, bouton-poussoir, capteurs divers  
+
+---
+
+## Raspberry Pi Pico W
+Le **Raspberry Pi Pico W** repose sur la puce **RP2040** (dual-core ARM Cortex-M0+).  
+Il offre :
+- 26 broches GPIO  
+- Interfaces I²C, SPI, UART, PWM, ADC  
+- 264 Ko de SRAM et 2 Mo de Flash  
+- Une connexion **Wi-Fi 2.4 GHz (802.11 n)**  
+
+### Schéma du brochage
+*(coller ici votre propre image ou utiliser celle ci-dessous)*  
+![Raspberry Pi Pico W Pinout](https://www.raspberrypi.com/documentation/microcontrollers/images/picow-pinout.svg)
+
+---
+
+## MicroPython
+**MicroPython** est une version allégée du langage **Python 3**, conçue pour fonctionner sur les microcontrôleurs.  
+Elle permet de :
+- Gérer les **broches GPIO** pour piloter LED, capteurs, etc.  
+- Lire des **valeurs analogiques** (ADC)  
+- Générer des signaux **PWM**  
+- Utiliser des protocoles **I²C / SPI / UART**  
+- Connecter le Pico W à un **réseau Wi-Fi**
+
+---
+
+## Organisation du dépôt
+
+Chaque dossier contient :
+- Un fichier **README.md** descriptif  
+- Le **code source** correspondant  
+- Éventuellement des **photos, schémas ou datasheets**
+
+| Dossier | Description |
+|----------|--------------|
+| [GPIO](GPIO) | LED simple, bouton-poussoir, interruption |
+| [AD-PWM](AD-PWM) | Lecture du potentiomètre, PWM (LED, musique, servo) |
+| [LCD](LCD) | Fonctions de la librairie LCD et affichage du potentiomètre |
+| [LED_neo](LED_neo) | Utilisation des LED NeoPixel (arc-en-ciel, effets) |
+| [sensors](sensors) | Capteurs : température, humidité, luminosité, PIR |
+| [network](network) | Connexion réseau (Wi-Fi) avec le Pico W |
+
+---
+
+## Ressources utiles
+- [Documentation officielle Raspberry Pi Pico](https://www.raspberrypi.com/documentation/microcontrollers/)
+- [Tutoriels MicroPython](https://docs.micropython.org/)
+- [IDE Thonny](https://thonny.org/)
+- [Brochage Pico W (PDF)](https://datasheets.raspberrypi.com/picow/pico-w-datasheet.pdf)
+
+---
+
+## Crédits
+Projet développé dans le cadre du cours de **MicroPython / SmartCorridor (SmartCities)**.  
+Matériel et instructions : **Professeur Camus** — HEPL Liège.  
+Réalisation : Martin Maximilien
+Licence : **MIT**
