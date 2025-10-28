@@ -1,0 +1,84 @@
+Exercice 4 -- LED RGB réactive à la musique (MicroPython -- Raspberry Pi Pico W)
+1. Objectif
+
+Ce projet met en œuvre un système de réaction lumineuse au son basé
+sur une carte Raspberry Pi Pico W.
+Le montage capte le niveau sonore ambiant à l’aide d’un microphone
+analogique et fait changer la couleur d’une LED RGB (NeoPixel) à
+chaque pic sonore détecté.
+Le seuil de détection est ajustable dans le code pour calibrer la
+sensibilité selon le volume de la musique.
+
+2. Matériel utilisé
+
+Élément Description Broche Pico W
+
+Microphone Module analogique (sortie AO) A0 (GP26)
+Mesure du niveau sonore
+
+LED RGB (NeoPixel) LED adressable 1 pixel (WS2812) D16 (GP16)
+
+Alimentation 3V3 ou 5 V selon module —
+
+/!\ Les masses (GND) du micro et de la LED doivent être communes.
+
+3. Dépendances
+
+Firmware MicroPython (≥ 1.20)
+
+Fichiers à copier sur la carte :
+
+main.py : programme principal
+
+Modules standards MicroPython : machine, time, random,
+neopixel
+
+4. Principe de fonctionnement
+4.1 Acquisition du signal audio
+
+Le module micro convertit le son en tension analogique (0 – 3,3 V).
+
+Le Pico lit cette tension via son convertisseur ADC (0 à 65535).
+
+Lorsque la valeur dépasse un seuil (SEUIL), le programme considère qu’il s’agit d’un pic sonore.
+
+4.2 Réaction lumineuse
+
+À chaque pic détecté :
+
+Une nouvelle couleur aléatoire est générée (R, G, B de 0 à 255).
+
+La LED RGB change instantanément de couleur.
+
+Un délai (DELAI) empêche les détections trop rapides pour éviter le clignotement excessif.
+
+5. Paramètres principaux du programme
+
+Variable Rôle Valeur par défaut
+
+SEUIL Niveau de détection du son 40000 (ajuster 20000–40000)
+DELAI Temps minimum entre 2 pics 0.15 seconde
+nb_leds Nombre de LED NeoPixel en chaîne 1
+
+Seuil bas → LED très sensible (agit pour des sons faibles).
+
+Seuil haut → LED moins sensible (agit seulement sur les basses fortes).
+
+6. Structure du dépôt 
+
+SmartCities/
+└── LED_neo/
+    └── Exercice4/
+        ├── main.py         # Code principal
+        └── README.md       # Présent document
+
+
+6. Amélioration possibles
+
+Faire le bonus du projet
+
+7. Auteur
+
+MARTIN Maximilien
+HEPL -- Master Ingénieur Industriel (orientation Informatique)
+Projet SmartCities -- Exercice 4 : LED RGB réactive à la musique (MicroPython)
