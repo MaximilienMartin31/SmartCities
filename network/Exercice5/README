@@ -1,6 +1,145 @@
+# Exercice 5 — Horloge Servo (MicroPython — Raspberry Pi Pico W)
 
-Auteur
+## 1. Objectif
+
+Ce projet met en œuvre une **horloge analogique simplifiée** à l’aide d’un **servomoteur** contrôlé par une carte **Raspberry Pi Pico W**.  
+Le système récupère automatiquement l’heure exacte via Internet (protocole **NTP**) et positionne le servo en fonction de l’heure actuelle.  
+Un **bouton-poussoir** permet de :
+
+- **Changer de fuseau horaire** par un **clic simple** (UTC → UTC+1 → UTC−5 → UTC).  
+- **Changer le mode d’affichage** entre **12 heures** et **24 heures** par un **double-clic rapide** (+1 clic de confirmation, dommage).  
+- À chaque changement de mode, l’horloge repart sur le fuseau **UTC 0** pour simplifier la lecture.
+
+## 2. Matériel utilisé
+
+| Élément          | Description                                    | Broche Pico W |
+|------------------|------------------------------------------------|---------------|
+| Servomoteur      | SG90 ou équivalent                             | D18 (GP18)    |
+| Bouton-poussoir  | Module numérique (avec pull-up interne activé) | D20 (GP20)    |
+| Alimentation     | 5 V ou 3.3 V selon le servo                    |      -        |
+| Connexion Wi-Fi  | Réseau 2.4 GHz (le 5 GHz n’est pas supporté)   |      —        |
+
+> ⚠️ La masse (GND) du servo et celle de la Pico W doivent être **communes**.  
+> ⚠️ Le Pico W doit être connecté à un **réseau Wi-Fi 2.4 GHz**.
+
+## 3. Dépendances
+
+- **Firmware MicroPython** ≥ 1.20  
+- **Modules standards MicroPython** : `machine`, `time`, `network`, `ntptime`
+
+### Fichiers à copier sur la carte :
+- `main.py` → programme principal de l’horloge servo
+
+## 4. Principe de fonctionnement
+
+### 4.1 Synchronisation de l’heure
+
+Au démarrage, la Pico W se connecte automatiquement au Wi-Fi (`SSID` et mot de passe à configurer dans le code).  
+Elle contacte ensuite un serveur **NTP (Network Time Protocol)** pour récupérer l’heure UTC exacte.
+
+### 4.2 Calcul de la position du servo
+
+Le servo tourne sur **180°** pour représenter le cycle d’une journée :
+
+- En **mode 12 h** → 0° à 180° couvre 12 heures (0° = minuit / midi, 90° = 6 h, 180° = 12 h).  
+- En **mode 24 h** → 0° à 180° couvre 24 heures (0° = 00 h, 90° = 12 h, 180° = 24 h).
+
+Le rapport cyclique PWM est calculé pour correspondre à l’angle souhaité (0.5 ms → 0°, 2.5 ms → 180°).
+
+### 4.3 Gestion du bouton
+
+|Type d’appui          | Action                     | Résultat                                    |
+|----------------------|----------------------------|---------------------------------------------|
+| Clic simple          | Change de fuseau horaire   | UTC 0 → UTC +1 → UTC −5 → UTC 0             |
+| Double-clic rapide   | Change de mode d’affichage | Mode 12 h ↔ Mode 24 h (et retour sur UTC 0) |
+
+## 5. Paramètres principaux
+
+| Variable                 | Rôle                                           | Valeur par défaut |
+|--------------------------|------------------------------------------------|-------------------|
+| `WIFI_SSID`, `WIFI_PASS` | Identifiants du réseau Wi-Fi                   | à configurer      |
+| `SERVO_PIN`              | Broche du signal PWM du servo                  | 18                |
+| `BUTTON_PIN`             | Broche du bouton                               | 20                |
+| `DOUBLE_DELAY`           | Temps max entre deux clics pour un double-clic | 400 ms            |
+
+## 6. Structure du dépôt
+
+SmartCities/
+└── network/
+    └── Exercice5/
+        ├── main.py # Code principal
+        └── README.md # Présent document
+
+## 7. Améliorations possibles
+
+- Optimisation en évitant de devoir cliquer une fois après un double clic (changement de mode).
+
+## 8. Calcul de l’angle du servomoteur
+
+Le servomoteur peut se déplacer entre 0° et 180°, et cet angle est utilisé pour représenter l’heure sur un cadran.
+
+⚙️ Mode 12 heures
+
+Le cadran de 12 h est représenté sur 180°.
+
+Donc chaque heure = 180° / 12 = 15°.
+
+Heure (h)	Position angulaire du servo (°)
+12 h        0°
+1 h	        15°
+2 h	        30°
+3 h	        45°
+4 h	        60°
+5 h	        75°
+6 h	        90°
+7 h	        105°
+8 h	        120°
+9 h	        135°
+10 h	    150°
+11 h	    165°
+12 h (midi)	180°
+
+--> Mode 12h :  Angle = ((h % 12) / 12) * 180
+
+
+
+⚙️ Mode 24 heures
+
+Le cycle complet de 24 h est aussi représenté sur 180°.
+
+Donc chaque heure = 180° / 24 = 7,5°.
+
+Heure (h)	            Position angulaire du servo (°)
+0 h (minuit)	        0°
+1 h	                    7,5°
+2 h	                    15°
+3 h		                22,5°
+4 h	                    30°
+5 h	                    37,5°
+6 h	                    45°
+7 h	                    52,5°
+8 h	                    60°
+9 h	                    67,5°
+10 h	                75°
+11 h	                82,5°
+12 h	                90°
+13 h	                97,5°
+14 h	                105°
+15 h	                112,5°
+16 h	                120°
+17 h	                127,5°
+18 h	                135°
+19 h	                142,5°
+20 h	                150°
+21 h	                157,5°
+22 h	                165°
+23 h	                172,5°
+24 h (minuit suivant)	180°
+
+--> Mode 24h :  Angle = (h / 24) * 180
+
+## 9. Auteur
 
 MARTIN Maximilien
-HEPL -- Master Ingénieur Industriel (orientation Informatique)
-Projet SmartCities -- Exercice 4 : LED RGB réactive à la musique (MicroPython)
+HEPL — Master Ingénieur Industriel (orientation Informatique)  
+Projet SmartCities — Exercice 5 : Horloge Servo (MicroPython — Raspberry Pi Pico W)
