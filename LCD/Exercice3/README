@@ -1,0 +1,168 @@
+# Exercice 3 -- Gestion d'alarme de température (MicroPython -- Raspberry Pi Pico W)
+
+## 1. Objectif
+
+Ce projet met en œuvre un système complet de **surveillance et d'alarme
+de température** basé sur une carte **Raspberry Pi Pico W**.\
+Le système lit la température ambiante à l'aide d'un capteur **DHT11**,
+compare cette valeur à une **température de consigne** réglée par un
+**potentiomètre**, et affiche les résultats sur un **écran LCD 1602
+I2C**.\
+En fonction de la différence, le programme gère également une **LED** et
+un **buzzer** pour signaler différents états.
+
+------------------------------------------------------------------------
+
+## 2. Matériel utilisé
+
+  ------------------------------------------------------------------------
+  Élément            Description                Broche Pico
+  ------------------ -------------------------- --------------------------
+  Potentiomètre      Lecture analogique         A0 (GP26)
+                     (température de consigne)  
+
+  LED                Sortie PWM pour effets     D18 (GP18)
+                     lumineux                   
+
+  Buzzer             Sortie PWM pour signal     D20 (GP20)
+                     sonore                     
+
+  Capteur DHT11      Température ambiante       D16 (GP16)
+
+  Écran LCD 1602 I2C Affichage 2 lignes, 16     I2C0 (SDA = GP8, SCL =
+                     caractères                 GP9)
+  ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 3. Dépendances
+
+-   Firmware **MicroPython** (≥ 1.20)
+-   Fichiers à copier sur la carte :
+    -   `main.py` : programme principal
+    -   `lcd1602.py` : driver pour écran LCD 1602 I2C
+-   Modules standards MicroPython : `machine`, `time`, `dht`
+
+------------------------------------------------------------------------
+
+## 4. Principe de fonctionnement
+
+### 4.1 Lecture des entrées
+
+-   Le potentiomètre fixe la **température de consigne** dans une plage
+    de **15 °C à 35 °C**.\
+-   Le capteur DHT11 lit la **température ambiante**.\
+-   Le programme calcule la différence :\
+    `diff = température_ambiante - température_consigne`.
+
+### 4.2 États du système
+
+  ---------------------------------------------------------------------------------------
+  État            Condition               LED             Buzzer            LCD
+  --------------- ----------------------- --------------- ----------------- -------------
+  **Normal**      `diff ≤ 0`              Effet           Inactif           Affiche Set /
+                                          "respiration"                     Ambient
+                                          (variation                        
+                                          douce)                            
+
+  **Vigilance**   `0 < diff ≤ 3`          Clignotement    Inactif           Affiche Set /
+                                          lent (0,5 Hz)                     Ambient
+
+  **Alarme**      `diff > 3`              Clignotement    Son continu (1    Message "!!!
+                                          rapide (en      kHz)              ALARM !!!"
+                                          continu)                          défilant puis
+                                                                            clignotant en
+                                                                            boucle
+
+  **Retour à la   `diff ≤ 3` après alarme LED et buzzer   Inactif           Reprise
+  normale**                               désactivés                        directe de
+                                                                            l'affichage
+                                                                            normal
+  ---------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 5. Détails d'affichage sur le LCD
+
+Pendant l'alarme : 1. Le texte `"!!! ALARM !!!"` défile de droite à
+gauche jusqu'à disparaître complètement. 2. Il revient progressivement
+depuis la droite. 3. Le message clignote cinq fois, puis le cycle
+recommence. 4. Ce comportement est non bloquant : la lecture du capteur
+et du potentiomètre continue en arrière-plan.
+
+La valeur de défilement est ajustée à `len(msg) + 25` pour garantir un
+aller-retour complet du texte sur un écran LCD 1602.
+
+------------------------------------------------------------------------
+
+## 6. Synchronisation des éléments
+
+  -----------------------------------------------------------------------
+  Élément           Comportement pendant l'alarme
+  ----------------- -----------------------------------------------------
+  LED               Clignote rapidement et en continu
+
+  Buzzer            Son continu à 1 kHz
+
+  LCD               Animation défilement + clignotement
+
+  Potentiomètre     Pris en compte dynamiquement pour mise à jour
+                    immédiate de la consigne
+
+  Capteur DHT11     Relevé environ toutes les 1 seconde (avec gestion
+                    d'erreur)
+  -----------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 7. Structure du dépôt
+
+    SmartCities/
+    └── LCD/
+        └── Exercice3/
+            ├── main.py         # Code principal
+            ├── lcd1602.py      # Driver LCD1602
+            └── README.md       # Présent document
+
+------------------------------------------------------------------------
+
+## 8. Tests de validation
+
+  --------------------------------------------------------------------------
+  Test            Action              Résultat attendu
+  --------------- ------------------- --------------------------------------
+  Réglage du      Tourner lentement   La ligne "Set" varie de 15 à 35 °C
+  potentiomètre                       
+
+  Chauffage du    Souffler dessus     "Ambient" augmente, passage de normal
+  capteur                             → vigilance → alarme
+
+  Passage         `diff = +2`         LED clignote lentement, buzzer inactif
+  vigilance                           
+
+  Passage alarme  `diff = +5`         LED et buzzer actifs, message "!!!
+                                      ALARM !!!" animé
+
+  Retour normal   Diminuer `diff`     Retour automatique à l'affichage
+                  sous 3              normal, LED dimmer
+  --------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 9. Améliorations possibles
+
+-   Variation progressive de la vitesse de clignotement selon la gravité
+    (`diff` plus grand → LED plus rapide).\
+-   Ajout de l'humidité du DHT11 sur la deuxième ligne du LCD.\
+-   Envoi des données (température, consigne, alarme) vers une base
+    MariaDB via Wi-Fi (intégration SmartCities).\
+-   Extinction automatique du LCD après inactivité prolongée.
+
+------------------------------------------------------------------------
+
+## 10. Auteur
+
+**MARTIN Maximilien**\
+HEPL -- Master Ingénieur Industriel (orientation Informatique)\
+Projet SmartCities -- Exercice 3 : Gestion d'alarme de température
+(MicroPython)
